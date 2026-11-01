@@ -1,0 +1,62 @@
+name: qaibridge-part2
+
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: qaibridge-part2-db
+    command: ["postgres", "-c", "port=5433"]
+    environment:
+      POSTGRES_DB: ${P2_DB_NAME:?Set P2_DB_NAME in the environment file}
+      POSTGRES_USER: qaibridge_admin_p2
+      POSTGRES_PASSWORD: ${P2_ADMIN_PASSWORD:?Set P2_ADMIN_PASSWORD in the environment file}
+      POSTGRES_APP_USER: ${P2_DB_USER:?Set P2_DB_USER in the environment file}
+      POSTGRES_APP_PASSWORD: ${P2_DB_PASSWORD:?Set P2_DB_PASSWORD in the environment file}
+      POSTGRES_READONLY_USER: ${P2_READONLY_USER:?Set P2_READONLY_USER in the environment file}
+      POSTGRES_READONLY_PASSWORD: ${P2_READONLY_PASSWORD:?Set P2_READONLY_PASSWORD in the environment file}
+    ports:
+      - "5434:5433"
+    volumes:
+      - part2_postgres_data:/var/lib/postgresql/data
+      - ./docker/init/create-readonly-role.sh:/docker-entrypoint-initdb.d/10-create-readonly-role.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\" -p 5433"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  web:
+    image: ${DOCKERHUB_IMAGE:-msyedtaha/qaibridge-assignment2}:${IMAGE_TAG:-latest}
+    container_name: qaibridge-part2-app
+    working_dir: /app
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${P2_DB_USER}:${P2_DB_PASSWORD}@database:5433/${P2_DB_NAME}
+      QAI_MAX_QUBITS: "6"
+      QAI_MAX_RAM_GB: "0.5"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./:/app:ro
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+    ports:
+      - "8082:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 90s
+    restart: unless-stopped
+
+volumes:
+  part2_postgres_data:
+    name: qaibridge_part2_postgres_data

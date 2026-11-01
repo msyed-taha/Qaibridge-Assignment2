@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101a30">
+    <title>Qaibridge | Quantum Learning Lab</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="Qaibridge home"><span class="brand-mark">Q</span> Qaibridge</a>
+      <span class="header-note">Assignment 1 · Cloud quantum learning lab</span>
+    </header>
+    <main>
+      <section class="hero">
+        <p class="eyebrow">A small, interactive quantum lab</p>
+        <h1>Build a circuit.<br><span>See what it does.</span></h1>
+        <p>Explore qubits with Qaibridge's state-vector simulator, practice a few guided challenges, and review saved runs.</p>
+      </section>
+
+      <nav class="module-nav" aria-label="Application modules">
+        <a href="#simulator">01 · Simulator</a>
+        <a href="#challenges">02 · Challenges</a>
+        <a href="#history">03 · Run history</a>
+      </nav>
+
+      <section class="panel" id="simulator">
+        <div class="section-heading">
+          <div><p class="eyebrow">Module 01</p><h2>Circuit simulator</h2></div>
+          <span class="pill">Qaibridge kernel</span>
+        </div>
+        <p class="section-copy">Start in the zero state, add gates, then simulate the circuit. Each run is saved to PostgreSQL.</p>
+        <div class="controls-grid">
+          <label>Number of qubits
+            <select id="qubit-count">
+              <option value="1">1 qubit</option><option value="2">2 qubits</option>
+              <option value="3">3 qubits</option><option value="4">4 qubits</option>
+              <option value="5">5 qubits</option><option value="6">6 qubits</option>
+            </select>
+          </label>
+          <label>Gate
+            <select id="gate-name">
+              <option>H</option><option>X</option><option>Y</option><option>Z</option>
+              <option>S</option><option>T</option><option>RX</option><option>RY</option>
+              <option>RZ</option><option>CNOT</option><option>CZ</option><option>SWAP</option>
+              <option>CCX</option>
+            </select>
+          </label>
+          <label>Target qubit
+            <select id="target-qubit"></select>
+          </label>
+          <label id="control-field">Control qubit
+            <select id="control-qubit"></select>
+          </label>
+          <label id="second-control-field" class="hidden">Second control
+            <select id="second-control"></select>
+          </label>
+          <label id="angle-field" class="hidden">Angle (radians)
+            <input id="gate-angle" type="number" value="1.5708" step="0.1">
+          </label>
+          <button class="button button-secondary" id="add-gate" type="button">Add gate</button>
+        </div>
+        <div class="circuit-box">
+          <div class="subheading"><h3>Your circuit</h3><button class="text-button" id="clear-gates" type="button">Clear circuit</button></div>
+          <p class="empty-state" id="empty-circuit">No gates yet. Add a gate above to get started.</p>
+          <ol class="gate-list" id="gate-list"></ol>
+        </div>
+        <div class="run-row">
+          <label>Measurement shots
+            <select id="shot-count"><option value="256">256</option><option value="512" selected>512</option><option value="1024">1,024</option><option value="2048">2,048</option></select>
+          </label>
+          <button class="button button-primary" id="run-circuit" type="button">Run simulation</button>
+          <span class="status" id="simulation-status" role="status"></span>
+        </div>
+        <div id="result-panel" class="result-panel hidden" aria-live="polite"></div>
+      </section>
+
+      <section class="panel" id="challenges">
+        <div class="section-heading">
+          <div><p class="eyebrow">Module 02</p><h2>Learning challenges</h2></div>
+          <span class="pill">Progress saved in PostgreSQL</span>
+        </div>
+        <p class="section-copy">Choose a short challenge, build the requested circuit above, and run it to check your answer.</p>
+        <div class="challenge-grid" id="challenge-list"><p class="empty-state">Loading challenges…</p></div>
+      </section>
+
+      <section class="panel" id="history">
+        <div class="section-heading">
+          <div><p class="eyebrow">Module 03</p><h2>Simulation history</h2></div>
+          <button class="text-button" id="refresh-history" type="button">Refresh</button>
+        </div>
+        <p class="section-copy">Your latest runs are persisted in the application's PostgreSQL database.</p>
+        <div id="history-list" class="history-list"><p class="empty-state">Loading saved runs…</p></div>
+      </section>
+    </main>
+    <footer><span>Qaibridge · Assignment application</span><span id="api-status">Checking API…</span></footer>
+  </body>
+</html>

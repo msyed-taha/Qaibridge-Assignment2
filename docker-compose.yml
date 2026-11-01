@@ -1,0 +1,49 @@
+name: qaibridge-part1
+
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: qaibridge-part1-db
+    command: ["postgres", "-c", "port=5433"]
+    environment:
+      POSTGRES_DB: ${P1_DB_NAME:?Set P1_DB_NAME in the environment file}
+      POSTGRES_USER: qaibridge_admin
+      POSTGRES_PASSWORD: ${P1_ADMIN_PASSWORD:?Set P1_ADMIN_PASSWORD in the environment file}
+      POSTGRES_APP_USER: ${P1_DB_USER:?Set P1_DB_USER in the environment file}
+      POSTGRES_APP_PASSWORD: ${P1_DB_PASSWORD:?Set P1_DB_PASSWORD in the environment file}
+      POSTGRES_READONLY_USER: ${P1_READONLY_USER:?Set P1_READONLY_USER in the environment file}
+      POSTGRES_READONLY_PASSWORD: ${P1_READONLY_PASSWORD:?Set P1_READONLY_PASSWORD in the environment file}
+    ports:
+      - "5432:5433"
+    volumes:
+      - part1_postgres_data:/var/lib/postgresql/data
+      - ./docker/init/create-readonly-role.sh:/docker-entrypoint-initdb.d/10-create-readonly-role.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\" -p 5433"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  web:
+    image: ${DOCKERHUB_IMAGE:-msyedtaha/qaibridge-assignment2}:${IMAGE_TAG:-latest}
+    container_name: qaibridge-part1-app
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${P1_DB_USER}:${P1_DB_PASSWORD}@database:5433/${P1_DB_NAME}
+      QAI_MAX_QUBITS: "6"
+      QAI_MAX_RAM_GB: "0.5"
+    ports:
+      - "8081:8000"
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+volumes:
+  part1_postgres_data:
+    name: qaibridge_part1_postgres_data
