@@ -14,7 +14,7 @@ services:
       POSTGRES_READONLY_USER: ${P2_READONLY_USER:?Set P2_READONLY_USER in the environment file}
       POSTGRES_READONLY_PASSWORD: ${P2_READONLY_PASSWORD:?Set P2_READONLY_PASSWORD in the environment file}
     ports:
-      - "5434:5433"
+      - "5435:5433"
     volumes:
       - part2_postgres_data:/var/lib/postgresql/data
       - ./docker/init/create-readonly-role.sh:/docker-entrypoint-initdb.d/10-create-readonly-role.sh:ro

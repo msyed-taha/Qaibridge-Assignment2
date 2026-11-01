@@ -10,7 +10,7 @@ An isolated, containerized version of the reduced Qaibridge educational simulato
 - `Jenkinsfile` tests the checked-out project in Docker, deploys Part II with Compose, and emails the commit author the build result.
 - `docker/init/create-readonly-role.sh` creates a read-only database role on first database initialization.
 
-Part I uses host port `8081` for the web application and host port `5432` for PostgreSQL, whose container listens on `5433`. This retains the standard external database port expected by the submission form while keeping host and container ports different. Part II uses host ports `8082` and `5434`; its containers and database volume are separate. Jenkins uses host port `8080`.
+To coexist with the Assignment 1 EC2 instance, Part I uses host port `8081` for the web application and host port `5434` for PostgreSQL, whose container listens on `5433`. Assignment 1 retains host port `5432`. Part II uses host ports `8082` and `5435`; its containers and database volume are separate. Jenkins uses host port `8080`. All published service ports differ from their container ports as required by the rubric.
 
 ## Environment configuration
 
@@ -33,7 +33,7 @@ docker compose --env-file /etc/qaibridge/assignment2.env -f docker-compose.yml p
 docker compose --env-file /etc/qaibridge/assignment2.env -f docker-compose.yml up -d
 ```
 
-Part I is available at `http://EC2_PUBLIC_IP:8081`. The evaluator database connection uses EC2's public IP, port `5432`, database `qaibridge_assignment`, and the `qaibridge_readonly` credentials from the environment file. Do not grant the evaluator write access.
+Part I is available at `http://EC2_PUBLIC_IP:8081`. The evaluator database connection uses EC2's public IP, port `5434`, database `qaibridge_assignment`, and the `qaibridge_readonly` credentials from the environment file. Include port `5434` in the report because the form does not have a separate database-port field. Do not grant the evaluator write access.
 
 ## Part II: Jenkins pipeline
 
